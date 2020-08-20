@@ -28,6 +28,14 @@ public class StartExperiment {
 		this.conf = new ConfExperiment(prop);
 	}
 	
+	public String exp_name() {
+		String name = prop.getProperty("RESULT_PATH");
+		name = name.split("/")[2];
+		name = name.split(".csv")[0];		
+		return name.split("_")[1].toUpperCase()+" " +name.split("_")[2].toUpperCase();
+		
+	}
+	
 	public void start() throws IOException, CloneNotSupportedException{
 		
 		long Start = System.currentTimeMillis();
@@ -36,6 +44,8 @@ public class StartExperiment {
 		File[] name_list;
 			
 		name_list = ReadDirFilesNames.leDir(path);//lista de arquivos contidos no diretorio
+		
+		View.title_1("EXPERIMENT: "+exp_name());
 		
 		for(int i = 0;i < name_list.length;i++) {
 			View.title_3("[ "+i+" ] - "+name_list[i].getName());

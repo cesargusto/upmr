@@ -1,4 +1,4 @@
-package com.upmr.localsearch;
+package com.upmr.localsearch_2;
 
 import com.upmr.core.Solution;
 

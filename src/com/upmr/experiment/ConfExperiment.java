@@ -21,11 +21,16 @@ package com.upmr.experiment;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.upmr.metaheuristic.grasp.Grasp;
+import com.upmr.metaheuristic.ig.IG;
+import com.upmr.metaheuristic.ils.Ils;
 import com.upmr.metaheuristic.sa.SA;
+import com.upmr.metaheuristic.vns.Vns;
 import com.upmr.instances.Instance;
 import com.upmr.core.Solution;
 import com.upmr.util.Calcs;
 import com.upmr.util.Parses;
+import com.upmr.util.View;
 
 public class ConfExperiment {
 	private Properties prop;
@@ -49,7 +54,213 @@ public class ConfExperiment {
 		BestResults best_results;
 		String algoritmo_name;
 		WriteResultsFile write_file;
+		
+		if(this.prop.getProperty("GRASP").equals("ON")) {
+			
+			//VNS
+			algoritmo_name = "GRASP";
+			best_results = new BestResults(this.prop);
+			write_file = new WriteResultsFile(best_results, file_name, this.prop);
+			time = new Time();
 
+			if(this.prop.getProperty("TIME_EXEC").equals("ON")) {
+				
+				String ts = this.prop.getProperty("VALUES_T");
+				String[] t_s = ts.split(",");
+				long limite = 0;
+				
+				for(int i = 0;i < this.num_exec;i++) {
+					for(int j = 0;j < t_s.length;j++) {
+						limite = this.calc.tempoExec(Parses.split_nmaq(file_name), Integer.parseInt(t_s[j]));
+						sol = new Solution(inst);
+						sol.ConstroiSolution();
+						Vns vns = new Vns(sol, best_results);
+						sol = vns.execute_vns(limite);
+						best_results.setValueT(sol.makespan());
+					}
+					best_results.setTabelaT(best_results.getValueT());
+					best_results.clean_valueT();
+				}
+				best_results.calc_media_valuesT(best_results.soma_valuesT());
+				write_file.write_gap(algoritmo_name);
+				
+			}else {
+
+				int grasp_max = Integer.parseInt(this.prop.getProperty("GRASP_MAX"));//iterações do algoritmo
+				//double T = Double.parseDouble(this.prop.getProperty("T"));
+				
+				long start = 0;
+				long end = 0;
+				long t = 0;
+				
+				for(int i = 0;i < num_exec;i++) {
+					start = System.currentTimeMillis();
+					
+					Grasp grasp = new Grasp(inst, grasp_max, best_results);
+					grasp.r_grasp();
+					
+					end = System.currentTimeMillis();
+					t = end - start;
+					time.setTempo(t);
+				}
+				write_file.write_gap(algoritmo_name);
+			}
+		}
+
+		if(this.prop.getProperty("IG").equals("ON")) {
+			
+			//VNS
+			algoritmo_name = "IG";
+			best_results = new BestResults(this.prop);
+			write_file = new WriteResultsFile(best_results, file_name, this.prop);
+			time = new Time();
+
+			if(this.prop.getProperty("TIME_EXEC").equals("ON")) {
+				
+				String ts = this.prop.getProperty("VALUES_T");
+				String[] t_s = ts.split(",");
+				long limite = 0;
+				
+				for(int i = 0;i < this.num_exec;i++) {
+					for(int j = 0;j < t_s.length;j++) {
+						limite = this.calc.tempoExec(Parses.split_nmaq(file_name), Integer.parseInt(t_s[j]));
+						sol = new Solution(inst);
+						sol.ConstroiSolution();
+						Vns vns = new Vns(sol, best_results);
+						sol = vns.execute_vns(limite);
+						best_results.setValueT(sol.makespan());
+					}
+					best_results.setTabelaT(best_results.getValueT());
+					best_results.clean_valueT();
+				}
+				best_results.calc_media_valuesT(best_results.soma_valuesT());
+				write_file.write_gap(algoritmo_name);
+				
+			}else {
+
+				int ig_max = Integer.parseInt(this.prop.getProperty("IG_MAX"));//iterações do algoritmo
+				double T = Double.parseDouble(this.prop.getProperty("T"));
+				
+				long start = 0;
+				long end = 0;
+				long t = 0;
+				
+				for(int i = 0;i < num_exec;i++) {
+					start = System.currentTimeMillis();
+					
+					sol = new Solution(inst);
+					sol.ConstroiSolution();
+					IG ig = new IG();
+					sol = ig.run(sol, T, ig_max, best_results);
+					
+					end = System.currentTimeMillis();
+					t = end - start;
+					time.setTempo(t);
+				}
+				write_file.write_gap(algoritmo_name);
+			}
+		}
+		
+		if(this.prop.getProperty("VNS").equals("ON")) {
+			
+			//VNS
+			algoritmo_name = "VNS";
+			best_results = new BestResults(this.prop);
+			write_file = new WriteResultsFile(best_results, file_name, this.prop);
+			time = new Time();
+
+			if(this.prop.getProperty("TIME_EXEC").equals("ON")) {
+				
+				String ts = this.prop.getProperty("VALUES_T");
+				String[] t_s = ts.split(",");
+				long limite = 0;
+				
+				for(int i = 0;i < this.num_exec;i++) {
+					for(int j = 0;j < t_s.length;j++) {
+						limite = this.calc.tempoExec(Parses.split_nmaq(file_name), Integer.parseInt(t_s[j]));
+						sol = new Solution(inst);
+						sol.ConstroiSolution();
+						Vns vns = new Vns(sol, best_results);
+						sol = vns.execute_vns(limite);
+						best_results.setValueT(sol.makespan());
+					}
+					best_results.setTabelaT(best_results.getValueT());
+					best_results.clean_valueT();
+				}
+				best_results.calc_media_valuesT(best_results.soma_valuesT());
+				write_file.write_gap(algoritmo_name);
+				
+			}else {
+
+				int vns_max = Integer.parseInt(this.prop.getProperty("VNS_MAX"));//iterações do algoritmo
+				
+				long start = 0;
+				long end = 0;
+				long t = 0;
+				
+				for(int i = 0;i < num_exec;i++) {
+					start = System.currentTimeMillis();
+					sol = new Solution(inst);
+					sol.ConstroiSolution();
+					Vns vns = new Vns(sol, vns_max, best_results);
+					sol = vns.execute_vns(true);
+					end = System.currentTimeMillis();
+					t = end - start;
+					time.setTempo(t);
+				}
+				write_file.write_gap(algoritmo_name);
+			}
+		}
+		
+		if(this.prop.getProperty("ILS").equals("ON")) {
+			//ILS
+			algoritmo_name = "ILS";
+			best_results = new BestResults(this.prop);
+			write_file = new WriteResultsFile(best_results, file_name, this.prop);
+			time = new Time();
+			
+			if(this.prop.getProperty("TIME_EXEC").equals("ON")) {
+				String ts = this.prop.getProperty("VALUES_T");
+				String[] t_s = ts.split(",");
+				long limite = 0;
+				
+				for(int i = 0;i < this.num_exec;i++) {
+					for(int j = 0;j < t_s.length;j++) {
+						limite = this.calc.tempoExec(Parses.split_nmaq(file_name), Integer.parseInt(t_s[j]));
+						sol = new Solution(inst);
+						sol.ConstroiSolution();
+						Ils ils = new Ils(sol, best_results);
+						sol = ils.execute_ils(limite);
+						best_results.setValueT(sol.makespan());
+					}
+					best_results.setTabelaT(best_results.getValueT());
+					best_results.clean_valueT();
+				}
+				best_results.calc_media_valuesT(best_results.soma_valuesT());
+				write_file.write_gap(algoritmo_name);
+			}else {
+				int ils_max = Integer.parseInt(this.prop.getProperty("ILS_MAX"));
+				
+				long start = 0;
+				long end = 0;
+				long t = 0;
+				
+				for(int i = 0;i < num_exec;i++) {//nºexec vs. Time
+					start = System.currentTimeMillis();
+					
+					sol = new Solution(inst);
+					sol.ConstroiSolution();
+					Ils ils = new Ils(sol, ils_max, best_results);
+					sol = ils.execute_ils();
+					
+					end = System.currentTimeMillis();
+					t = end - start;
+					time.setTempo(t);
+				}
+				write_file.write_gap(algoritmo_name);
+			}
+		}
+		
 		if(this.prop.getProperty("SA").equals("ON")) {
 			
 			//SA

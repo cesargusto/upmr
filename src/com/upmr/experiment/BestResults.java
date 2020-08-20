@@ -133,7 +133,9 @@ public class BestResults {
 	}
 	
 	public void setTabelaT(ArrayList<Integer> t) {
-		ArrayList<Integer> temp = (ArrayList<Integer>) t.clone();
+		//ArrayList<Integer> temp = (ArrayList<Integer>) t.clone();
+		@SuppressWarnings("unchecked")
+		ArrayList<Integer> temp = ((ArrayList<Integer>) t.clone());
 		this.tabela_t.add(temp);
 	}
 	

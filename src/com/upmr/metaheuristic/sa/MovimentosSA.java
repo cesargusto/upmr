@@ -113,53 +113,52 @@ public class MovimentosSA implements Cloneable {
 			indice_maq2 = rnd.nextInt(solucao.getSizeSol());
 		}
 		
+		int job_m1 = -1;
+		
 		int tamanho_maq1 = solucao.getMaq(indice_maq1).getSizeMaq();
 		int p1_m1 = -1;
-		if(tamanho_maq1 > 1)
-			p1_m1 = rnd.nextInt(tamanho_maq1);//get a random position in this machine
-		else
-			p1_m1 = 0;
-		
-		int job_m1 = solucao.getMaq(indice_maq1).getJob(p1_m1); 
-		
+
 		int tamanho_maq2 = solucao.getMaq(indice_maq2).getSizeMaq();
 		int p1_m2 = -1;
-		if(tamanho_maq2 > 1)
+		
+		if(tamanho_maq1 > 1 && tamanho_maq2 > 1) {
+			
+			p1_m1 = rnd.nextInt(tamanho_maq1);//get a random position in this machine
+			job_m1 = solucao.getMaq(indice_maq1).getJob(p1_m1); 
+			
 			p1_m2 = rnd.nextInt(tamanho_maq2);
-		else
-			p1_m2 = 0;
-
-		solucao.getMaq(indice_maq2).setJobMaq(p1_m2, job_m1);
-		solucao.getMaq(indice_maq1).removeJobToMaq(p1_m1);	//remove this job of first machine	
-		
-		
-		tamanho_maq2 = solucao.getMaq(indice_maq2).getSizeMaq();
-		if(tamanho_maq2 > 1)
-			p1_m2 = rnd.nextInt(tamanho_maq2);
-		else
-			p1_m2 = 0;
-		
-		int job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2); 
-		//test if it the same job
-		while(job_m1 == job_m2) {
-			if(tamanho_maq2 > 1) {
-				p1_m2 = rnd.nextInt(tamanho_maq2);
-				job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2);
-			}else {
-				p1_m2 = 0;
-				job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2);
-			}
+	
+			solucao.getMaq(indice_maq2).setJobMaq(p1_m2, job_m1);
+			solucao.getMaq(indice_maq1).removeJobToMaq(p1_m1);	//remove this job of first machine
+			
 		}
-
-		tamanho_maq1 = solucao.getMaq(indice_maq1).getSizeMaq();
-		int p2_m1 = -1;
-		if(tamanho_maq1 > 1)
-			p2_m1 = rnd.nextInt(tamanho_maq1);
-		else
-			p2_m1 = 0;
 		
-		solucao.getMaq(indice_maq1).setJobMaq(p2_m1, job_m2);
-		solucao.getMaq(indice_maq2).removeJobToMaq(p1_m2);
+		tamanho_maq1 = solucao.getMaq(indice_maq1).getSizeMaq();
+		tamanho_maq2 = solucao.getMaq(indice_maq2).getSizeMaq();
+		
+		int p2_m1 = -1;
+		int job_m2 = -1;
+		
+		if(tamanho_maq1 > 1 && tamanho_maq2 > 1) {
+			p1_m2 = rnd.nextInt(tamanho_maq2);
+			p2_m1 = rnd.nextInt(tamanho_maq1);
+			
+			job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2); 
+			
+			//test if it the same job
+			while(job_m1 == job_m2) {
+				if(tamanho_maq2 > 1) {
+					p1_m2 = rnd.nextInt(tamanho_maq2);
+					job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2);
+				}else {
+					p1_m2 = 0;
+					job_m2 = solucao.getMaq(indice_maq2).getJob(p1_m2);
+				}
+			}
+			
+			solucao.getMaq(indice_maq1).setJobMaq(p2_m1, job_m2);
+			solucao.getMaq(indice_maq2).removeJobToMaq(p1_m2);
+		}
 		
 		return solucao;
 	}

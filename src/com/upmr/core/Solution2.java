@@ -16,33 +16,31 @@ import java.util.Random;
 
 import com.upmr.core.Machine;
 import com.upmr.instances.Instance;
-import com.upmr.reparator.PendingJob;
-import com.upmr.reparator.SwapLast;
 
-public class Solution implements Cloneable{
+public class Solution2 implements Cloneable{
 	
 	private Instance arquivo;
 	private List<Machine> solucao;
 	private List<Integer>resource_curve;
-	private PendingJob pending_list;
+	private List<Integer>pending_list;
 	
-	public Solution(){
+	public Solution2(){
 		this.solucao = new ArrayList<>();
-		this.pending_list = new PendingJob();
+		this.pending_list = new ArrayList<>();
 	}
-	public Solution(Instance arq){
+	public Solution2(Instance arq){
 		this.arquivo = arq;
 		this.solucao = new ArrayList<>();
-		this.pending_list = new PendingJob();
+		this.pending_list = new ArrayList<>();
 	}
-	public Solution(Machine maq){
+	public Solution2(Machine maq){
 		this.solucao = new ArrayList<>();
 		this.solucao.add(maq);
 	}
 	
 	@Override
-	public Solution clone() throws CloneNotSupportedException {
-		Solution solCp = new Solution(arquivo);
+	public Solution2 clone() throws CloneNotSupportedException {
+		Solution2 solCp = new Solution2(arquivo);
 		int tam = solucao.size();
 		for(int i = 0;i < tam;i++){
 			solCp.solucao.add(new Machine());
@@ -156,8 +154,7 @@ public class Solution implements Cloneable{
 	 * 
 	 */
 	public ArrayList<Integer> makespan(List<Integer>tempos, ArrayList<Integer> alter_maqs){
-		//int mspan = 0;
-		@SuppressWarnings("unchecked")
+		int mspan = 0;
 		ArrayList<Integer>mspans = (ArrayList)tempos;
 		for(int t = 0;t < alter_maqs.size();t++){
 			mspans.set(alter_maqs.get(t), this.getMaq(alter_maqs.get(t)).tempoMaq(arquivo, alter_maqs.get(t)));
@@ -498,10 +495,12 @@ public class Solution implements Cloneable{
 		}
 
 		this.resource_curve = this.reduce_M(soma);
+				
 		return major;
+		
 	}
 
-	public boolean remove_major() throws CloneNotSupportedException {
+	public boolean remove_major() {
 		//get_major -> index 0 = machine index
 		//			   index 1 = major job
 		//			   index 3 = major resource
@@ -513,7 +512,7 @@ public class Solution implements Cloneable{
 			//check if machine is bigger then one
 			if(this.getMaq(major_list.get(0)).getSizeMaq() > 1) {
 				//Add the major element on the pending list
-				this.pending_list.setPending(major_list.get(1));
+				this.setPending_list(major_list.get(1));
 				//Get the index of the element on the solution
 				i_s = this.getMaq(major_list.get(0)).getMaquina().indexOf(major_list.get(1));
 				//Remove the job of the solution
@@ -524,16 +523,67 @@ public class Solution implements Cloneable{
 				//identify makespan machine
 				//swap current job with last one of the makespan machine
 				//if solution not get feasible then swap with previous one
-				SwapLast swap_last = new SwapLast(this, pending_list);
-				swap_last.execute(major_list.get(0));
+				this.swap_last(major_list.get(0));
 			}
 		}
 		//major list empty
 		//there is no job to remove anymore
 		return true;
 	}
+	/**
+	 * This method is called when the solution have only one job in the target machine
+	 * and that solution does not feasible
+	 * @param index
+	 */
+	public void swap_last(int index) {
+		// faz uma copia da solução para ficar mais facil de desfazer se for necessario
+		int index_makespan = this.maior_menor().get(2);
+		for (int i = 0; i < this.getMaq(index_makespan).getSizeMaq(); i++) {
+			int job1 = this.getMaq(index_makespan).getJob(i);
+			int job2 = this.getMaq(index).getJob(0);
+			if(index != index_makespan) {
+				//take the last job of the makespan and swap
+				this.getMaq(index).addJobToMaq(job1);
+				//remove the job
+				this.getMaq(index_makespan).insertJobToMaq(i, job2);
+				this.getMaq(index_makespan).removeJobToMaq(i+1);				
+				
+				this.getMaq(index).removeJobToMaq(0);
+				
+			}else {
+				Random rnd = new Random();
+				int size = this.getSizeSol();
+				int other_m = rnd.nextInt(size);
+				
+				while(other_m == index){
+					other_m = rnd.nextInt(size);
+				}
+				//swap with a pending list element
+				this.getMaq(index).addJobToMaq(this.getMaq(other_m).getJob(0));
+				int e = this.getMaq(index).getJob(0);
+				this.getMaq(index).removeJobToMaq(0);
+				this.getMaq(other_m).removeJobToMaq(0);
+			
+				if(this.check_feasibility()) {
+					this.setPending_list(e);
+					break;
+				}else {
+					System.out.println("non-feasible - Implement inner mechanism");
+				}
+			}
+			if(this.check_feasibility())
+				break;
+			else {
+				this.getMaq(index).addJobToMaq(job2);
+				this.getMaq(index_makespan).removeJobToMaq(i);
+				this.getMaq(index_makespan).insertJobToMaq(i, job1);
+				this.getMaq(index).removeJobToMaq(0);
+			
+			}
+		}
+	}
 	
-	public void clean_solution() throws CloneNotSupportedException {
+	public void clean_solution() {
 		while(true) {
 			if(this.remove_major())
 				break;
@@ -572,7 +622,7 @@ public class Solution implements Cloneable{
 	
 	public boolean add_job(boolean M_m) {
 		boolean key = false;
-		if(!this.pending_list.isEmpty()) {
+		if(!this.getPending_list().isEmpty()) {
 			
 			int i_m = -1;
 			
@@ -581,7 +631,7 @@ public class Solution implements Cloneable{
 			else
 				i_m = this.maior_menor().get(2); //bigger machine index
 			
-			int job = this.pending_list.get_pend_job(0); //pending job
+			int job = this.getPending_list().get(0); //pending job
 			
 			//resource of the last job
 			int prev_res = this.getPrev_res(i_m);
@@ -635,12 +685,12 @@ public class Solution implements Cloneable{
 		
 		//ArrayList<ArrayList<Integer>> M = this.generate_M();
 		
-		if(!this.pending_list.isEmpty()) {
+		if(!this.getPending_list().isEmpty()) {
 			
 			int menor = this.maior_menor().get(0); //smaller machine index
 			int maior = this.maior_menor().get(2); //bigger machine index
 			
-			int job = this.pending_list.get_pend_job(0); //pending job
+			int job = this.getPending_list().get(0); //pending job
 			
 			int prev_res = this.getPrev_res(menor);
 			int actual_res = this.get_Resource_d(menor, job);
@@ -695,7 +745,7 @@ public class Solution implements Cloneable{
 			}
 			
 		} catch (Exception e) {
-			//System.out.println("An exception was captured!");
+			System.out.println("An exception was captured!");
 		}
 	}
 	
@@ -733,6 +783,14 @@ public class Solution implements Cloneable{
 			}
 		}
 		return reduced;
+	}
+
+	public List<Integer> getPending_list() {
+		return pending_list;
+	}
+	
+	public void setPending_list(int job) {
+		this.pending_list.add(job);
 	}
 	
 	public List<Integer> getResource_curve() {

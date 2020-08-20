@@ -94,7 +94,7 @@ public class WriteResultsFile {
 			
 			if(arquivo.length() == 0) {
 				//bw.write("INSTANCIA\tALGORITMO\tLIT.\tMELHOR\tAVG_T=10\tAVG_T=30\tAVG_T=50\tPIOR\tAVG\tMEDI.\tRPDbst\tRPDavg");
-				bw.write("INSTANCIA\tLIT.\tMELHOR\tAVG\tRPDbst\tRPDavg");
+				bw.write("INSTANCIA;LITERATURA;MELHOR;AVG;RPDbst;RPDavg");
 				bw.newLine();
 			}
 			

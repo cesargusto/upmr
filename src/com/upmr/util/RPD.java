@@ -13,7 +13,8 @@ package com.upmr.util;
 public class RPD {
 	
 	public static double rpd_i(double v_alg, double v_lit){
-		return (double)(v_alg - v_lit)/v_lit; //calcula o gap
+		//return (double)(v_alg - v_lit)/v_lit; //calcula o gap
+		return (v_alg - v_lit)/v_lit; //calcula o gap
 	}
 	
 	public static double rpdi_avg() {
